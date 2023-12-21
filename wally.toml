@@ -1,0 +1,12 @@
+[package]
+name = "bkmazefe/coffeeshoptycoon"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+Fusion = "elttob/fusion@0.2.0"
+Cmdr = "evaera/cmdr@1.12.0"
+Testez = "roblox/testez@0.4.1"
+Promise = "evaera/promise@4.0.0"
+ProfileService = "nidoxs/profileservice@1.0.0"
