@@ -5,9 +5,11 @@ local Comet = require(script.Parent.Comet)
 ]]
 export type abstractProfile = { Data: { [string]: any } }
 export type GamepassGranted = { Player? | abstractProfile? | number? }
+export type ProductGranted = { Player? | abstractProfile? | number? }
 export type PlayerDataLoaded = { Player? | abstractProfile? }
 export type Events = {
 	GamepassGranted: Comet.Comet<GamepassGranted>,
+	ProductGranted: Comet.Comet<ProductGranted>,
 	PlayerDataLoaded: Comet.Comet<PlayerDataLoaded>,
 }
 

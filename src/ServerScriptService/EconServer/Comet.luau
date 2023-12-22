@@ -50,6 +50,8 @@ function Comet._updateAll<T>(self: Comet<T>)
 			local val = self:get()
 			if self._doesUnpack == true and val and next(val) then
 				resolve(callback(table.unpack(val)))
+			else
+				resolve(callback(val))
 			end
 		end):catch(warn)
 	end

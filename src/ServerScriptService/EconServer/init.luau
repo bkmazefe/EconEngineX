@@ -18,18 +18,16 @@ local DataModule = require(script.DataModule)
 local EconTypes = require(script.EconTypes)
 local PassProductHandler = require(script.PassProductHandler)
 
-type EconServer = {
-	Events: { [string]: EconTypes.EconEvent<any> },
-	Methods: { [string]: (...any) -> ...any },
-}
 --[[
 	returns (player, profile)
 ]]
 local e_GamepassGranted = Comet({ nil, nil, 0 })
-local e_PlayerDataLoaded = Comet({ nil, nil })
+local e_ProductGranted = Comet({ nil, nil, 0 })
+local e_PlayerDataLoaded = Comet({ nil, nil }, true)
 
 local CometEvents = {
 	GamepassGranted = e_GamepassGranted,
+	ProductGranted = e_ProductGranted,
 	PlayerDataLoaded = e_PlayerDataLoaded,
 }
 
@@ -38,28 +36,33 @@ local Modules = {
 	PassProductHandler = PassProductHandler,
 }
 
+export type EconServer = {
+	Events: { [string]: EconTypes.EconEvent<any> },
+	Methods: { [string]: (...any) -> ...any },
+	Data: typeof(DataModule.Pub),
+}
+
 local EconServer: EconServer = {
 	Events = {},
 	Methods = {},
+	Data = DataModule.Pub,
 }
+for _, v in Modules do
+	v._init(CometEvents)
+end
 
 --[[
 	Initialize every EconServer module to setup their fireable and,
 	connectable events
 ]]
-for _, v in Modules do
-	v._init(CometEvents)
-	for i, x in v.Pub do
-		EconServer.Methods[i] = x
-	end
-end
 
 EconServer.Events.GamepassGranted = e_GamepassGranted :: EconTypes.EconEvent<EconTypes.GamepassGranted>
+EconServer.Events.ProductGranted = e_ProductGranted :: EconTypes.EconEvent<EconTypes.ProductGranted>
 EconServer.Events.PlayerDataLoaded = e_PlayerDataLoaded :: EconTypes.EconEvent<EconTypes.PlayerDataLoaded>
 
 Players.PlayerAdded:Connect(function(plr)
 	DataModule.Secure.onPlayerAdded(plr)
-	local profile = DataModule.Pub.GetProfile(plr)
+	local profile = EconServer.Data.GetProfile(plr)
 	if profile then
 		PassProductHandler.Secure.checkIfPlayerOwnsPasses(plr, profile)
 	end

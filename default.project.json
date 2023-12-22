@@ -1,5 +1,5 @@
 {
-  "name": "Coffee Shop Tycoon",
+  "name": "EconEngine",
   "tree": {
     "$className": "DataModel",
     "ReplicatedStorage": {

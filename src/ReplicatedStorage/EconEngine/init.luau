@@ -17,3 +17,5 @@ end
 	Add the RemoteEvent Handler (Probe) and any other function that may needed
 	to be called from the client.
 ]]
+
+return EconEngine :: typeof(EconEngine)

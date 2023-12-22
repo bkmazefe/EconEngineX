@@ -1,4 +1,4 @@
-local HttpService = game:GetService("HttpService")
+--local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local _MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -74,6 +74,7 @@ function DataModule.Secure.onPlayerAdded(player: Player) --Set up the profile fo
 
 			-- A profile has been successfully loaded:
 			replicateLoadedDataToServer(player, profile)
+			print("update ready")
 			Events.PlayerDataLoaded:set({ player, profile })
 		else
 			-- Player left before the profile loaded:

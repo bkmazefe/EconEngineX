@@ -1,3 +1,6 @@
+local ServerScriptService = game:GetService("ServerScriptService")
+
+local Template = require(ServerScriptService.EconDataTemplate.Template)
 --[[
 	* Setup your products according to the template:
 
@@ -7,7 +10,7 @@
 ]]
 
 return {
-	[0] = function(player, profile)
+	[0] = function(player: Player, profile: typeof(Template))
 		--print("got purchase")
 		-- do something
 	end,

@@ -1,0 +1,10 @@
+# Ignore Roblox files
+*.rbxlx
+*.rbxmx
+*.rbxl
+
+# Ignore lock files
+*.lock
+
+.DS_Store/
+sourcemap.json/

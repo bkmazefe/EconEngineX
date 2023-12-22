@@ -115,6 +115,7 @@ function PassProductHandler.Secure.ProcessReceipt(receipt_info)
 	if profile ~= nil then
 		return PurchaseIdCheckAsync(profile, receipt_info.PurchaseId, function()
 			GrantProduct(player, receipt_info.ProductId)
+			Events.ProductGranted:set({ player, profile, receipt_info.ProductId })
 		end)
 	else
 		return Enum.ProductPurchaseDecision.NotProcessedYet
@@ -125,11 +126,15 @@ function PassProductHandler.Secure.checkIfPlayerOwnsPasses(plr: Player, profile:
 	for id, f in SETTINGS.GamePasses do
 		Promise.new(function(resolve)
 			resolve(MarketplaceService:UserOwnsGamePassAsync(plr.UserId, id))
-		end):andThen(function(body)
-			if body == true then
-				f(plr, profile)
-			end
 		end)
+			:catch(function(msg)
+				warn(msg)
+			end)
+			:andThen(function(body)
+				if body == true then
+					f(plr, profile)
+				end
+			end)
 	end
 end
 
