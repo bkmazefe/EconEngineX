@@ -6,5 +6,5 @@
 # Ignore lock files
 *.lock
 
-.DS_Store/
-sourcemap.json/
+.DS_Store*
+/sourcemap.json

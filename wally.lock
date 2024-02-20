@@ -3,19 +3,9 @@
 registry = "test"
 
 [[package]]
-name = "bkmazefe/coffeeshoptycoon"
-version = "0.1.0"
-dependencies = [["Cmdr", "evaera/cmdr@1.12.0"], ["Fusion", "elttob/fusion@0.2.0"], ["ProfileService", "nidoxs/profileservice@1.0.0"], ["Promise", "evaera/promise@4.0.0"], ["Testez", "roblox/testez@0.4.1"]]
-
-[[package]]
-name = "elttob/fusion"
-version = "0.2.0"
-dependencies = []
-
-[[package]]
-name = "evaera/cmdr"
-version = "1.12.0"
-dependencies = []
+name = "bkmazefe/econ-engine"
+version = "0.0.1"
+dependencies = [["ProfileService", "nidoxs/profileservice@1.0.0"], ["Promise", "evaera/promise@4.0.0"], ["Testez", "roblox/testez@0.4.1"]]
 
 [[package]]
 name = "evaera/promise"
