@@ -14,9 +14,8 @@
 local Players = game:GetService("Players")
 
 local Comet = require(script.Comet)
-local DataModule = require(script.DataModule)
 local EconTypes = require(script.EconTypes)
-local PassProductHandler = require(script.PassProductHandler)
+local Private_EconData = require(script.Private_EconData)
 
 --[[
 	returns (player, profile)
@@ -31,11 +30,12 @@ local CometEvents = {
 	GamepassGranted = e_GamepassGranted,
 	ProductGranted = e_ProductGranted,
 	PlayerDataLoaded = e_PlayerDataLoaded,
+	PlayerJoined = e_PlayerJoined,
+	PlayerLeaving = e_PlayerLeaving,
 }
 
-local Modules = {
-	DataModule = DataModule,
-	PassProductHandler = PassProductHandler,
+export type EconData = {
+	GetProfile: (Player) -> Private_EconData.Profile?,
 }
 
 export type EconServer = {
@@ -47,43 +47,31 @@ export type EconServer = {
 		PlayerLeaving: EconTypes.EconEvent<EconTypes.PlayerLeaving>,
 	},
 	Methods: { [string]: (...any) -> ...any },
-	Data: typeof(DataModule.Pub),
+	Data: Private_EconData.EconDataInternal,
 	RunBeforePlayerLeaves: (Player) -> ()?,
 }
 
 local EconServer: EconServer = {
-	Events = {
-		GamepassGranted = e_GamepassGranted,
-		ProductGranted = e_ProductGranted,
-		PlayerDataLoaded = e_PlayerDataLoaded,
-		PlayerJoined = e_PlayerJoined,
-		PlayerLeaving = e_PlayerLeaving,
-	},
+	Events = CometEvents,
 	Methods = {},
-	Data = DataModule.Pub,
+	Data = Private_EconData.new(CometEvents),
 }
-for _, v in Modules do
-	v._init(CometEvents)
-end
 
---[[
-	Initialize every EconServer module to setup their fireable and,
-	connectable events
-]]
+local PassProductHandler = require(script.PassProductHandler).new(EconServer.Data, CometEvents)
 
 Players.PlayerAdded:Connect(function(plr)
-	DataModule.Secure.onPlayerAdded(plr)
+	EconServer.Data:_onPlayerAdded(plr)
 	local profile = EconServer.Data.GetProfile(plr)
 	if profile then
-		PassProductHandler.Secure.checkIfPlayerOwnsPasses(plr, profile)
+		PassProductHandler.CheckIfPlayerOwnsPasses(plr, profile)
 	end
 end)
 
 Players.PlayerRemoving:Connect(function(plr)
-	if EconServer.RunBeforePlayerLeaves ~= nil then
+	if EconServer.RunBeforePlayerLeaves ~= nil and typeof(EconServer.RunBeforePlayerLeaves) == "function" then
 		EconServer.RunBeforePlayerLeaves(plr)
 	end
-	DataModule.Secure.onPlayerRemoving(plr)
+	EconServer.Data:_onPlayerRemoving(plr)
 end)
 
-return EconServer
+return EconServer :: any

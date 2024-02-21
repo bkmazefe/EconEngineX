@@ -1,18 +1,14 @@
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 
-local DataModule = require(script.Parent.DataModule)
 local Passes = require(script.Parent.Parent.Settings.EconPurchasables.Passes)
 local Products = require(script.Parent.Parent.Settings.EconPurchasables.Products)
 local Promise = require(script.Parent.Parent.Parent.Promise)
 local EconTypes = require(script.Parent.EconTypes)
+local Private_EconData = require(script.Parent.Private_EconData)
 
-local Events: EconTypes.Events
-
-local PassProductHandler = {
-	Secure = {},
-	Pub = {},
-}
+local PassProductHandler = {}
+PassProductHandler.__index = PassProductHandler
 ------------------------------------** Purchase handling
 -- Data store for tracking purchases that were successfully processed
 local SETTINGS = {
@@ -24,6 +20,16 @@ local SETTINGS = {
 	-- to purchase products faster than individual purchases can be confirmed.
 	-- Anything beyond 30 should be good enough.
 }
+
+function PassProductHandler.new(
+	EconData: Private_EconData.EconDataInternal?,
+	Events: EconTypes.Events?
+): PassProductHandler
+	local self = setmetatable({}, PassProductHandler)
+	self.Data = EconData
+	self.Events = Events
+	return self
+end
 
 local function PurchaseIdCheckAsync(profile, purchase_id, grant_product_callback) --> Enum.ProductPurchaseDecision
 	-- Yields until the purchase_id is confirmed to be saved to the profile or the profile is released
@@ -80,19 +86,19 @@ local function PurchaseIdCheckAsync(profile, purchase_id, grant_product_callback
 	end
 end
 
-local function GetPlayerProfileAsync(player: Player) --> [Profile] / nil
+function PassProductHandler.GetPlayerProfileAsync(self: PassProductHandler, player: Player) --> [Profile] / nil
 	-- Yields until a Profile linked to a player is loaded or the player leaves
-	local profile = DataModule.Pub.GetProfile(player)
+	local profile = self.Data.GetProfile(player)
 	while profile == nil and player:IsDescendantOf(Players) == true do
 		task.wait()
-		profile = DataModule.Pub.GetProfile(player)
+		profile = self.Data.GetProfile(player)
 	end
 	return profile
 end
 
-local function GrantProduct(player: Player, product_id: number)
+function PassProductHandler.GrantProduct(self: PassProductHandler, player: Player, product_id: number)
 	-- We shouldn't yield during the product granting process!
-	local profile = DataModule.Pub.GetProfile(player)
+	local profile = self.Data.GetProfile(player)
 	local product_function = SETTINGS.Products[product_id]
 	if product_function ~= nil then
 		product_function(player, profile)
@@ -101,26 +107,26 @@ local function GrantProduct(player: Player, product_id: number)
 	end
 end
 
-function PassProductHandler.Secure.ProcessReceipt(receipt_info)
+function PassProductHandler.ProcessReceipt(self: PassProductHandler, receipt_info)
 	local player = Players:GetPlayerByUserId(receipt_info.PlayerId)
 
 	if player == nil then
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 
-	local profile = GetPlayerProfileAsync(player)
+	local profile = self:GetPlayerProfileAsync(player)
 
 	if profile ~= nil then
 		return PurchaseIdCheckAsync(profile, receipt_info.PurchaseId, function()
-			GrantProduct(player, receipt_info.ProductId)
-			Events.ProductGranted:set({ player, profile, receipt_info.ProductId })
+			self:GrantProduct(player, receipt_info.ProductId)
+			self.Events.ProductGranted:set({ player, profile, receipt_info.ProductId })
 		end)
 	else
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 end
 
-function PassProductHandler.Secure.checkIfPlayerOwnsPasses(plr: Player, profile: DataModule.profile)
+function PassProductHandler.CheckIfPlayerOwnsPasses(plr: Player, profile: Private_EconData.Profile)
 	for id, f in SETTINGS.GamePasses do
 		Promise.new(function(resolve)
 			resolve(MarketplaceService:UserOwnsGamePassAsync(plr.UserId, id))
@@ -136,25 +142,28 @@ function PassProductHandler.Secure.checkIfPlayerOwnsPasses(plr: Player, profile:
 	end
 end
 
-function PassProductHandler.Secure.GamePassPurchaseFinished(player: Player, gamepassId: number, wasPurchased: boolean)
+function PassProductHandler.GamePassPurchaseFinished(
+	self: PassProductHandler,
+	player: Player,
+	gamepassId: number,
+	wasPurchased: boolean
+)
 	if not wasPurchased then
 		return
 	end
 
-	local profile = DataModule.Pub.GetProfile(player)
+	local profile = self.Data.GetProfile(player)
 	if not profile then
 		return
 	end
 
-	local gamepass_function: (Player, DataModule.profile) -> () = SETTINGS.GamePasses[gamepassId]
+	local gamepass_function: (Player, Private_EconData.Profile) -> () = SETTINGS.GamePasses[gamepassId]
 	if gamepass_function ~= nil then
 		gamepass_function(player, profile)
-		Events.GamepassGranted:set({ player, profile, gamepassId })
+		self.Events.GamepassGranted:set({ player, profile, gamepassId })
 	end
 	return
 end
 
-PassProductHandler._init = function(t)
-	Events = t
-end
+export type PassProductHandler = typeof(PassProductHandler.new())
 return PassProductHandler

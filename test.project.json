@@ -1,0 +1,12 @@
+{
+	"name": "econengine-test",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"EconEngine": {
+				"$path": "src/EconEngine"
+			}
+		}
+	}
+}
