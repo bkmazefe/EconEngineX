@@ -1,27 +1,27 @@
 --# EconEngine #--
-
 local RunService = game:GetService("RunService")
+local EconServer = require(script.EconServer)
 local isServer = RunService:IsServer()
 
 local EconTypes = require(script.EconServer.EconTypes)
 local EconEngine = {}
 
-if isServer == true then
-	local EconServer = require(script.EconServer)
-	EconEngine.Server = EconServer :: Server
+export type Data = EconServer.EconData
+export type Server = {
+	Events: {
+		GamepassGranted: EconTypes.EconEvent<EconTypes.GamepassGranted>,
+		ProductGranted: EconTypes.EconEvent<EconTypes.ProductGranted>,
+		PlayerDataLoaded: EconTypes.EconEvent<EconTypes.PlayerDataLoaded>,
+		PlayerJoined: EconTypes.EconEvent<EconTypes.PlayerJoined>,
+		PlayerLeaving: EconTypes.EconEvent<EconTypes.PlayerLeaving>,
+	},
+	Methods: { [string]: (...any) -> ...any },
+	Data: Data,
+}
+export type Profile = EconTypes.abstractProfile
 
-	export type Data = EconServer.EconData
-	export type Server = {
-		Events: {
-			GamepassGranted: EconTypes.EconEvent<EconTypes.GamepassGranted>,
-			ProductGranted: EconTypes.EconEvent<EconTypes.ProductGranted>,
-			PlayerDataLoaded: EconTypes.EconEvent<EconTypes.PlayerDataLoaded>,
-			PlayerJoined: EconTypes.EconEvent<EconTypes.PlayerJoined>,
-			PlayerLeaving: EconTypes.EconEvent<EconTypes.PlayerLeaving>,
-		},
-		Methods: { [string]: (...any) -> ...any },
-		Data: Data,
-	}
+if isServer == true then
+	EconEngine.Server = EconServer() :: Server
 else
 	script.EconServer:Destroy()
 end

@@ -19,11 +19,10 @@ local Profiles: { [Player]: Profile? } = {}
 --[[
 	Data template
 ]]
-local data = Template
-local ProfileStore = ProfileService.GetProfileStore(EconEngineSettings.DataStoreName, data)
+local ProfileStore = ProfileService.GetProfileStore(EconEngineSettings.DataStoreName, Template)
 
 export type Profile = {
-	Data: typeof(data),
+	Data: typeof(Template),
 }
 
 type dataM = {

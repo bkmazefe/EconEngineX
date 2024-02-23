@@ -57,21 +57,24 @@ local EconServer: EconServer = {
 	Data = Private_EconData.new(CometEvents),
 }
 
-local PassProductHandler = require(script.PassProductHandler).new(EconServer.Data, CometEvents)
+local PassProductHandler = require(script.Private_PassProductHandler).new(EconServer.Data, CometEvents)
 
-Players.PlayerAdded:Connect(function(plr)
-	EconServer.Data:_onPlayerAdded(plr)
-	local profile = EconServer.Data.GetProfile(plr)
-	if profile then
-		PassProductHandler.CheckIfPlayerOwnsPasses(plr, profile)
-	end
-end)
+function setup()
+	Players.PlayerAdded:Connect(function(plr)
+		EconServer.Data:_onPlayerAdded(plr)
+		local profile = EconServer.Data.GetProfile(plr)
+		if profile then
+			PassProductHandler.CheckIfPlayerOwnsPasses(plr, profile)
+		end
+	end)
 
-Players.PlayerRemoving:Connect(function(plr)
-	if EconServer.RunBeforePlayerLeaves ~= nil and typeof(EconServer.RunBeforePlayerLeaves) == "function" then
-		EconServer.RunBeforePlayerLeaves(plr)
-	end
-	EconServer.Data:_onPlayerRemoving(plr)
-end)
+	Players.PlayerRemoving:Connect(function(plr)
+		if EconServer.RunBeforePlayerLeaves ~= nil and typeof(EconServer.RunBeforePlayerLeaves) == "function" then
+			EconServer.RunBeforePlayerLeaves(plr)
+		end
+		EconServer.Data:_onPlayerRemoving(plr)
+	end)
+	return EconServer
+end
 
-return EconServer :: any
+return setup

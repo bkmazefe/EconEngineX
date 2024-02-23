@@ -2,7 +2,7 @@
 	"name": "test",
 	"tree": {
 		"$path": "Packages",
-		"econengine": {
+		"EconEngine": {
 			"$path": "src/EconEngine"
 		}
 	}
